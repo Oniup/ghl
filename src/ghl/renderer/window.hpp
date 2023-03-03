@@ -1,11 +1,9 @@
 #ifndef __GHL_RENDERER_WINDOW_HPP__
 #define __GHL_RENDERER_WINDOW_HPP__
 
-#include "ghl/utils/shared.hpp"
+#include "ghl/utils/utils.hpp"
 
 #include <GLFW/glfw3.h>
-#include <string>
-#include <string_view>
 
 namespace ghl {
 
