@@ -4,8 +4,12 @@
 
 namespace ghl {
 
+    bool Window::m_glfw_init = false;
 
-    Window::Window(int width, int height, std::string_view title) : m_width(width), m_height(height), m_title(title) {
+    Window::Window(int width, int height, std::string_view title) : ApplicationLayer(GHL_WINDOW_LAYER_NAME), m_width(width), m_height(height), m_title(title) {
+        if (!m_glfw_init) {
+            glfwInit();
+        }
         _init_internal_window();
     }
 
@@ -15,11 +19,7 @@ namespace ghl {
         }
     }
 
-    void Window::init_glfw() {
-        glfwInit();
-    }
-
-    void Window::terminate_glfw() {
+    void Window::terminate_glfw_instance() {
         glfwTerminate();
     }
 

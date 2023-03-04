@@ -1,22 +1,22 @@
 #ifndef __GHL_RENDERER_WINDOW_HPP__
 #define __GHL_RENDERER_WINDOW_HPP__
 
+#include "ghl/core/application_layer.hpp"
 #include "ghl/utils/utils.hpp"
 
 #include <GLFW/glfw3.h>
 
 namespace ghl {
 
-    class GHL_API Window {
+    class Window : public ApplicationLayer {
     public:
         Window(int width, int height, std::string_view title);
-        ~Window();
+        virtual ~Window() override;
 
         inline GLFWwindow* get_internal() { return m_internal; }
         inline const GLFWwindow* get_internal() const { return m_internal; }
 
-        static void init_glfw();
-        static void terminate_glfw();
+        static void terminate_glfw_instance();
 
         void swap_buffers();
         bool should_close();
@@ -24,6 +24,7 @@ namespace ghl {
     private:
         void _init_internal_window();
 
+        static bool m_glfw_init;
         int m_width{};
         int m_height{};
         std::string m_title{};

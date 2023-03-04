@@ -6,11 +6,17 @@ namespace ghl {
         _init_required_layers();
     }
 
-    ApplicationLayer* Application::get_layer(std::string_view name) {
+    Application::~Application() {
         for (ApplicationLayer* layer : m_layers) {
-            if (layer->get_name() == name) {
-                return layer;
-            }
+            delete layer;
+        }
+
+        Window::terminate_glfw_instance();
+    }
+
+    ApplicationLayer* Application::get_layer(std::string_view name) {
+        for (int i = static_cast<int>(m_layers.size()) - 1; i < 0; i--) {
+            delete m_layers[i];
         }
         return nullptr;
     }
@@ -25,18 +31,25 @@ namespace ghl {
     }
 
     ApplicationLayer* Application::push_layer(ApplicationLayer* layer) {
-        GHL_ASSERT(layer != nullptr, "ApplicationLayer::push_layer -> layer == nullptr")
+        GHL_ASSERT(layer == nullptr, "ApplicationLayer::push_layer -> layer == nullptr")
 
         m_layers.insert(m_layers.begin(), layer);
         return m_layers.front();
     }
 
     void Application::run() {
-        std::cout << "application is running\n";
+        while (!m_window_layer->should_close()) {
+            for (ApplicationLayer* layer : m_layers) {
+                layer->on_update();
+            }
+
+            m_window_layer->swap_buffers();
+        }
     }
 
     void Application::_init_required_layers() {
-        std::cout << "init required layers\n";
+        m_window_layer = static_cast<Window*>(push_layer(new Window(600, 600, "Test Window")));
+        push_layer(new Debug());
     }
 
 }

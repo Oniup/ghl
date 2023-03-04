@@ -5,6 +5,7 @@
 #include <string_view>
 #include <string>
 #include <vector>
+#include <tuple>
 #include <array>
 #include <set>
 #include <unordered_map>
@@ -12,16 +13,6 @@
 #include <algorithm>
 #include <random>
 #include <stdarg.h>
-
-#if defined(_WIN32) && defined(GHL_BUILD_DLL)
-#   define GHL_API __declspec(dllexport)
-#elif defined(_WIN32) && defined(GHL_DLL)
-#   define GHL_API __declspec(dllimport)
-#elif defined(__GNUC__) && defined(GHL_BUILD_DLL)
-#   define GHL_API __attribute__((visibility("default")))
-#else
-#   define GHL_API
-#endif
 
 #ifndef NDEBUG
 #   define GHL_ASSERT(CONDITION, ERR_MESSAGE)\
@@ -43,6 +34,9 @@
 #   define GHL_ASSERT_FMT(CONDITION, ERR_FORMAT, ...)
 
 #endif
+
+#define GHL_WINDOW_LAYER_NAME "Window"
+#define GHL_DEBUG_LAYER_NAME "Debug"
 
 namespace ghl {
 

@@ -8,6 +8,8 @@ add_library(
     src/ghl/core/application.hpp
     src/ghl/core/application.cpp
     src/ghl/core/application_layer.hpp
+    src/ghl/core/debug.hpp
+    src/ghl/core/debug.cpp
     src/ghl/renderer/window.hpp
     src/ghl/renderer/window.cpp
     src/ghl/utils/utils.hpp
