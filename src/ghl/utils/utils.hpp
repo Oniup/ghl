@@ -35,8 +35,9 @@
 
 #endif
 
-#define GHL_WINDOW_LAYER_NAME "Window"
-#define GHL_DEBUG_LAYER_NAME "Debug"
+#define GHL_WINDOW_LAYER_NAME           "Window"
+#define GHL_DEBUG_LAYER_NAME            "Debug"
+#define GHL_SCENE_MANAGER_LAYER_NAME    "Scene Manager"
 
 namespace ghl {
 

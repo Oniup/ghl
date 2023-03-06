@@ -1,4 +1,5 @@
 #include "ghl/core/application.hpp"
+#include "ghl/core/scene_manager.hpp"
 
 namespace ghl {
 
@@ -49,7 +50,9 @@ namespace ghl {
 
     void Application::_init_required_layers() {
         m_window_layer = static_cast<Window*>(push_layer(new Window(600, 600, "Test Window")));
+
         push_layer(new Debug());
+        push_layer(new SceneManager());
     }
 
 }

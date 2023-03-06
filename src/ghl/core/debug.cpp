@@ -11,7 +11,9 @@ namespace ghl {
     }
 
     void Debug::log(std::string_view message, DebugType type) {
-        m_instance->m_logs.push_back(std::tuple<DebugType, std::string>(type, message));
+        if (m_instance != nullptr) {
+            m_instance->m_logs.push_back(std::tuple<DebugType, std::string>(type, message));
+        }
     }
 
     void Debug::on_update() {

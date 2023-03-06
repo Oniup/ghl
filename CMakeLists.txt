@@ -2,24 +2,24 @@ cmake_minimum_required(VERSION 3.2)
 
 add_subdirectory(thirdparty/glfw)
 
+file(GLOB_RECURSE GHL_HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.hpp")
+file(GLOB_RECURSE GHL_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
+
 add_library(
     ghl STATIC
 
-    src/ghl/core/application.hpp
-    src/ghl/core/application.cpp
-    src/ghl/core/application_layer.hpp
-    src/ghl/core/debug.hpp
-    src/ghl/core/debug.cpp
-    src/ghl/renderer/window.hpp
-    src/ghl/renderer/window.cpp
-    src/ghl/utils/utils.hpp
+    ${GHL_HEADER_FILES}
+    ${GHL_SOURCE_FILES}
 )
 
 target_include_directories(
     ghl
 
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt/single_include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
+    PUBLUC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm
 )
 
 target_link_libraries(
