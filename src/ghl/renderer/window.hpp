@@ -4,6 +4,7 @@
 #include "ghl/core/application_layer.hpp"
 #include "ghl/utils/utils.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace ghl {
@@ -15,9 +16,11 @@ namespace ghl {
 
         inline GLFWwindow* get_internal() { return m_internal; }
         inline const GLFWwindow* get_internal() const { return m_internal; }
+        inline void set_clear_color(glm::vec4 clear_color) { m_clear_color = clear_color; }
 
         static void terminate_glfw_instance();
 
+        void clear_screen();
         void swap_buffers();
         bool should_close();
 
@@ -27,6 +30,7 @@ namespace ghl {
         static bool m_glfw_init;
         int m_width{};
         int m_height{};
+        glm::vec4 m_clear_color{ 0.0f, 0.0f, 0.0f, 1.0f };
         std::string m_title{};
         GLFWwindow* m_internal{ nullptr };
     };

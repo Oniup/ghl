@@ -1,5 +1,6 @@
 #include "ghl/core/application.hpp"
 #include "ghl/core/scene_manager.hpp"
+#include "ghl/renderer/pipeline.hpp"
 
 namespace ghl {
 
@@ -16,8 +17,10 @@ namespace ghl {
     }
 
     ApplicationLayer* Application::get_layer(std::string_view name) {
-        for (int i = static_cast<int>(m_layers.size()) - 1; i < 0; i--) {
-            delete m_layers[i];
+        for (ApplicationLayer* layer : m_layers) {
+            if (layer->get_name() == name) {
+                return layer;
+            }
         }
         return nullptr;
     }
@@ -39,18 +42,22 @@ namespace ghl {
     }
 
     void Application::run() {
-        while (!m_window_layer->should_close()) {
+        Window* window = static_cast<Window*>(get_layer(GHL_WINDOW_LAYER_NAME));
+
+        while (!window->should_close()) {
+            window->clear_screen();
+
             for (ApplicationLayer* layer : m_layers) {
                 layer->on_update();
             }
 
-            m_window_layer->swap_buffers();
+            window->swap_buffers();
         }
     }
 
     void Application::_init_required_layers() {
-        m_window_layer = static_cast<Window*>(push_layer(new Window(600, 600, "Test Window")));
-
+        push_layer(new Window(600, 600, "Test Window"));
+        push_layer(new Pipeline());
         push_layer(new Debug());
         push_layer(new SceneManager());
     }

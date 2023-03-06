@@ -14,9 +14,7 @@ namespace ghl {
         virtual ~Application();
 
         ApplicationLayer* get_layer(std::string_view name);
-        Window* get_window_layer() { return m_window_layer; }
         const ApplicationLayer* get_layer(std::string_view name) const;
-        const Window* get_window_layer() const { return m_window_layer; }
 
         ApplicationLayer* push_layer(ApplicationLayer* layer);
 
@@ -24,7 +22,6 @@ namespace ghl {
     private:
         void _init_required_layers();
 
-        Window* m_window_layer{ nullptr };
         std::vector<ApplicationLayer*> m_layers{};
     };
 

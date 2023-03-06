@@ -8,6 +8,10 @@ file(GLOB_RECURSE GHL_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.c
 add_library(
     ghl STATIC
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include/glad/glad.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include/KHR/khrplatform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/src/glad.c
+
     ${GHL_HEADER_FILES}
     ${GHL_SOURCE_FILES}
 )
@@ -17,6 +21,7 @@ target_include_directories(
 
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt/single_include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
     PUBLUC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm

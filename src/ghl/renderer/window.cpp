@@ -23,6 +23,13 @@ namespace ghl {
         glfwTerminate();
     }
 
+    void Window::clear_screen() {
+        glClearColor(m_clear_color.r, m_clear_color.g, m_clear_color.b, m_clear_color.a);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glfwGetFramebufferSize(m_internal, &m_width, &m_height);
+        glViewport(0, 0, m_width, m_height);
+    }
+
     void Window::swap_buffers() {
         glfwSwapBuffers(m_internal);
         glfwPollEvents();
@@ -47,6 +54,9 @@ namespace ghl {
         }
 
         glfwMakeContextCurrent(m_internal);
+        GHL_ASSERT(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Window::_init_internal_window() -> failed to initialize glad");
+
+        glViewport(0, 0, m_width, m_height);
     }
 
 }
