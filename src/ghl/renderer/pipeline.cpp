@@ -1,4 +1,9 @@
 #include "ghl/renderer/pipeline.hpp"
+#include "ghl/utils/file_system.hpp"
+#include "ghl/core/debug.hpp"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace ghl {
 
@@ -35,6 +40,22 @@ namespace ghl {
 	}
 
 	Shader* Pipeline::load_shader(std::string_view vertex_path, std::string_view fragment_path) {
+		const char* paths[] = { fragment_path.data(), vertex_path.data() };
+		uint32_t shaders[2];
+
+		for (size_t i = 0; i < 2; i++) {
+			File file = File(paths[i], FileOpenState_ReadBinary);
+			if (!file.exists()) {
+				if (i == 1) {
+					glDeleteShader(shaders[0]);
+				}
+				return nullptr;
+			}
+
+			std::string source = file.get_source();
+			std::cout << "source \"" << paths[i] << "\"\n" << source << "\n";
+		}
+
 		return nullptr;
 	}
 
@@ -43,11 +64,21 @@ namespace ghl {
 	}
 
 	void Pipeline::remove_shader(std::string_view name) {
-
+		for (std::vector<Shader>::iterator shader = m_shaders.begin(); shader != m_shaders.end(); shader++) {
+			if (shader->name == name) {
+				m_shaders.erase(shader);
+				return;
+			}
+		}
 	}
 
 	void Pipeline::remove_texture(std::string_view name) {
-
+		for (std::vector<Texture>::iterator texture = m_textures.begin(); texture != m_textures.end(); texture++) {
+			if (texture->name == name) {
+				m_textures.erase(texture);
+				return;
+			}
+		}
 	}
 
 }
