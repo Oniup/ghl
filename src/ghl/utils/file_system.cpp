@@ -126,7 +126,7 @@ namespace ghl {
 
 		m_file = std::fopen(m_path.c_str(), state);
 		if (m_file == nullptr) {
-			Debug::log("failed to load file \"" + m_path + "\" as it doesn't exit");
+			Debug::log("failed to load file \"" + m_path + "\" as it doesn't exit", DebugType_Error);
 			return;
 		}
 	}

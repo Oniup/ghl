@@ -34,34 +34,24 @@ namespace ghl {
 
 	class SceneManager : public ApplicationLayer {
 	public:
-		static inline Scene* get_active() { return m_instance->m_active_scene; }
-		static inline Scene* get(std::string_view name) { return m_instance->impl_get(name); }
-
-		static inline Scene* push(std::string_view name) { return m_instance->impl_push(name); }
-		static inline Scene* push(std::string_view name, std::string_view path) { return m_instance->impl_push(name, path); }
-		static inline void push_system(PtrFunSystem system) { return m_instance->impl_push_system(system); }
-
-		static inline void remove(std::string_view name) { m_instance->impl_remove(name); }
-
-		static inline Scene* set_active(std::string_view name) { m_instance->impl_set_active(name); }
-		static inline void set_active(Scene* scene) { m_instance->impl_set_active(scene); }
+		static SceneManager* get() { return m_instance; }
 
 		SceneManager();
 		virtual ~SceneManager() override;
 
+		Scene* get(std::string_view name);
+		void remove(std::string_view name);
+
+		Scene* set_active(std::string_view name);
+		void set_active(Scene* scene);
+
+		Scene* push(std::string_view name);
+		Scene* push(std::string_view name, std::string_view path);
+		void push_system(PtrFunSystem system);
+
 		virtual void on_update() override;
 
 	private:
-		Scene* impl_get(std::string_view name);
-		void impl_remove(std::string_view name);
-
-		Scene* impl_set_active(std::string_view name);
-		void impl_set_active(Scene* scene);
-
-		Scene* impl_push(std::string_view name);
-		Scene* impl_push(std::string_view name, std::string_view path);
-		void impl_push_system(PtrFunSystem system);
-
 		static SceneManager* m_instance;
 
 		std::vector<Scene*> m_scenes{};

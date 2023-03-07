@@ -19,18 +19,18 @@ namespace ghl {
 
 	class Pipeline : public ApplicationLayer {
 	public:
+		static inline Pipeline* get() { return m_instance; }
+
 		Pipeline();
-		virtual ~Pipeline() override = default;
+		virtual ~Pipeline() override;
 
 		virtual void on_update() override;
-
-		static inline Pipeline* get_instance() { return m_instance; }
 
 		Shader* get_shader(std::string_view name);
 		Texture* get_texture(std::string_view name);
 
-		Shader* load_shader(std::string_view vertex_path, std::string_view fragment_path);
-		Texture* load_texture(std::string_view path, int channels);
+		Shader* load_shader(std::string_view name, std::string_view vertex_path, std::string_view fragment_path);
+		Texture* load_texture(std::string_view name, std::string_view path, bool flip = true);
 
 		void remove_shader(std::string_view name);
 		void remove_texture(std::string_view name);

@@ -1,4 +1,4 @@
-#include "ghl/renderer/comp_systems.hpp"
+#include "ghl/renderer/renderer_comps.hpp"
 
 namespace ghl {
 
@@ -6,7 +6,7 @@ namespace ghl {
 		// TODO: ...
 	}
 
-	void RenderSystems::sprite_animation_system(entt::registry& registry) {
+	void RenderSystems::sprite_atlas_animation_system(entt::registry& registry) {
 		// TODO: ...
 	}
 

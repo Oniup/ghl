@@ -10,7 +10,7 @@ namespace ghl {
 			m_systems.push_back(system);
 		}
 		else {
-			Debug::log("Scene::push_system(PtrFunSystem) -> system is null");
+			Debug::log("Scene::push_system(PtrFunSystem) -> ECS system is null therefore will not at this", DebugType_Warning);
 		}
 	}
 
@@ -26,7 +26,7 @@ namespace ghl {
 		}
 	}
 
-	Scene* SceneManager::impl_get(std::string_view name) {
+	Scene* SceneManager::get(std::string_view name) {
 		for (Scene* scene : m_scenes) {
 			if (scene->get_name() == name) {
 				return scene;
@@ -35,26 +35,26 @@ namespace ghl {
 		return nullptr;
 	}
 
-	Scene* SceneManager::impl_push(std::string_view name) {
+	Scene* SceneManager::push(std::string_view name) {
 		m_scenes.push_back(new Scene(name));
 		return m_scenes.back();
 	}
 
-	Scene* SceneManager::impl_push(std::string_view name, std::string_view path) {
+	Scene* SceneManager::push(std::string_view name, std::string_view path) {
 		// TODO: implement serialization scene so then this file can read the serialized scene
-		return impl_push(name);
+		return push(name);
 	}
 
-	void SceneManager::impl_push_system(PtrFunSystem system) {
+	void SceneManager::push_system(PtrFunSystem system) {
 		if (system != nullptr) {
 			m_systems.push_back(system);
 		}
 		else {
-			Debug::log("SceneManager::push_system(PtrFunSystem) -> system is null");
+			Debug::log("SceneManager::push_system(PtrFunSystem) -> system is null", DebugType_Warning);
 		}
 	}
 
-	void SceneManager::impl_remove(std::string_view name) {
+	void SceneManager::remove(std::string_view name) {
 		for (size_t i = 0; i < m_scenes.size(); i++) {
 			if (m_scenes[i]->get_name() == name) {
 				m_scenes.erase(m_scenes.begin() + i);
@@ -62,10 +62,10 @@ namespace ghl {
 			}
 		}
 
-		Debug::log("could not find scene named \"" + std::string(name) + "\"");
+		Debug::log("could not find scene named \"" + std::string(name) + "\"", DebugType_Error);
 	}
 
-	Scene* SceneManager::impl_set_active(std::string_view name) {
+	Scene* SceneManager::set_active(std::string_view name) {
 		for (Scene* scene : m_scenes) {
 			if (scene->get_name() == name) {
 				m_active_scene = scene;
@@ -73,11 +73,11 @@ namespace ghl {
 			}
 		}
 
-		Debug::log("the scene \"" + std::string(name) + "\" doesn't exist or hasn't been loaded into memory yet");
+		Debug::log("the scene \"" + std::string(name) + "\" doesn't exist or hasn't been loaded into memory yet", DebugType_Error);
 		return nullptr;
 	}
 
-	void SceneManager::impl_set_active(Scene* scene) {
+	void SceneManager::set_active(Scene* scene) {
 		GHL_ASSERT(scene == nullptr, "SceneManager::set_active(Scene*) -> scene is null");
 
 		m_active_scene = scene;

@@ -2,6 +2,7 @@
 #define __GHL_RENDERER_COMPONENTS_HPP__
 
 #include "ghl/utils/utils.hpp"
+#include "ghl/renderer/pipeline.hpp"
 
 #include <entt/entt.hpp>
 
@@ -14,17 +15,23 @@ namespace ghl {
 	};
 
 	struct SpriteRendererComponent {
-		// TODO: implement renderer ...
+		ghl::Shader* shader{ nullptr };
+		ghl::Texture* texture{ nullptr };
+		glm::vec2 uv{};
 	};
 
-	struct SpriteAnimationComponent {
+	struct SpriteAtlasAnimatorComponent {
 		SpriteRendererComponent* sprite_renderer{ nullptr };
-		// TODO: implement basic sprite renderer before this
+		uint32_t current_frame{};
+		std::vector<float> frame_lengths{};
+		glm::vec2 frame_size{};
+		glm::ivec2 frame_count{};
+		glm::vec2 frame_uv_size{};
 	};
 
 	struct RenderSystems {
 		void sprite_renderer_system(entt::registry& registry);
-		void sprite_animation_system(entt::registry& registry);
+		void sprite_atlas_animation_system(entt::registry& registry);
 	};
 
 }
