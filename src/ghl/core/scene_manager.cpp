@@ -5,16 +5,7 @@ namespace ghl {
 
 	SceneManager* SceneManager::m_instance = nullptr;
 
-	void Scene::push_system(PtrFunSystem system) {
-		if (system != nullptr) {
-			m_systems.push_back(system);
-		}
-		else {
-			Debug::log("Scene::push_system(PtrFunSystem) -> ECS system is null therefore will not at this", DebugType_Warning);
-		}
-	}
-
-	SceneManager::SceneManager() : ApplicationLayer(GHL_SCENE_MANAGER_LAYER_NAME) {
+	SceneManager::SceneManager() : ApplicationLayer(GHL_CORE_SCENE_MANAGER_LAYER_NAME) {
 		GHL_ASSERT(m_instance != nullptr, "SceneManager::SceneManager() -> cannot have multiple scene manager layers");
 
 		m_instance = this;
@@ -43,15 +34,6 @@ namespace ghl {
 	Scene* SceneManager::push(std::string_view name, std::string_view path) {
 		// TODO: implement serialization scene so then this file can read the serialized scene
 		return push(name);
-	}
-
-	void SceneManager::push_system(PtrFunSystem system) {
-		if (system != nullptr) {
-			m_systems.push_back(system);
-		}
-		else {
-			Debug::log("SceneManager::push_system(PtrFunSystem) -> system is null", DebugType_Warning);
-		}
 	}
 
 	void SceneManager::remove(std::string_view name) {
@@ -84,8 +66,16 @@ namespace ghl {
 	}
 
 	void SceneManager::on_update() {
-		for (PtrFunSystem system : m_systems) {
-			system(m_active_scene->get_registry());
+		for (System* system : m_systems) {
+			system->on_update(m_active_scene->get_registry());
+		}
+
+		for (System* system : m_systems) {
+			system->on_late_update(m_active_scene->get_registry());
+		}
+
+		for (System* system : m_systems) {
+			system->on_render(m_active_scene->get_registry());
 		}
 	}
 

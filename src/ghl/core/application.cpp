@@ -1,5 +1,6 @@
 #include "ghl/core/application.hpp"
 #include "ghl/core/scene_manager.hpp"
+#include "ghl/core/asset_handler.hpp"
 #include "ghl/renderer/pipeline.hpp"
 
 namespace ghl {
@@ -42,7 +43,7 @@ namespace ghl {
     }
 
     void Application::run() {
-        Window* window = static_cast<Window*>(get_layer(GHL_WINDOW_LAYER_NAME));
+        Window* window = static_cast<Window*>(get_layer(GHL_RENDERER_WINDOW_LAYER_NAME));
 
         while (!window->should_close()) {
             window->clear_screen();
@@ -60,6 +61,7 @@ namespace ghl {
         push_layer(new Pipeline());
         push_layer(new Debug());
         push_layer(new SceneManager());
+        push_layer(new AssetHandler());
     }
 
 }

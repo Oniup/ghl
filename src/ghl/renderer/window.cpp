@@ -6,7 +6,7 @@ namespace ghl {
 
     bool Window::m_glfw_init = false;
 
-    Window::Window(int width, int height, std::string_view title) : ApplicationLayer(GHL_WINDOW_LAYER_NAME), m_width(width), m_height(height), m_title(title) {
+    Window::Window(int width, int height, std::string_view title) : ApplicationLayer(GHL_RENDERER_WINDOW_LAYER_NAME), m_width(width), m_height(height), m_title(title) {
         if (!m_glfw_init) {
             glfwInit();
         }

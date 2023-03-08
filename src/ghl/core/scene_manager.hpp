@@ -4,11 +4,15 @@
 #include "ghl/utils/utils.hpp"
 #include "ghl/core/application_layer.hpp"
 
-#include <entt/entt.hpp>
-
 namespace ghl {
 
-	typedef void (*PtrFunSystem)(entt::registry&);
+	class System {
+	public:
+		//TODO(Ewan): virtual void on_fixed_update(entt::registry& registry) {}
+		virtual void on_update(entt::registry& registry) {}
+		virtual void on_late_update(entt::registry& registry) {}
+		virtual void on_render(entt::registry& registry) {}
+	};
 
 	class Scene {
 	public:
@@ -19,7 +23,10 @@ namespace ghl {
 		inline entt::registry& get_registry() { return m_reg; }
 		inline const entt::registry& get_registry() const { return m_reg; }
 
-		void push_system(PtrFunSystem system);
+		template <typename _System, typename ... _Args>
+		void push_system(_Args ... args) {
+			m_systems.push_back(new _System{ args... });
+		}
 
 	private:
 		Scene(const Scene& other) = delete;
@@ -29,7 +36,7 @@ namespace ghl {
 
 		std::string m_name{};
 		entt::registry m_reg{};
-		std::vector<PtrFunSystem> m_systems;
+		std::vector<System*> m_systems;
 	};
 
 	class SceneManager : public ApplicationLayer {
@@ -47,7 +54,11 @@ namespace ghl {
 
 		Scene* push(std::string_view name);
 		Scene* push(std::string_view name, std::string_view path);
-		void push_system(PtrFunSystem system);
+
+		template <typename _System, typename ... _Args>
+		void push_system(_Args ... args) {
+			m_systems.push_back(new _System(std::forward<_Args...>(args...)));
+		}
 
 		virtual void on_update() override;
 
@@ -55,7 +66,7 @@ namespace ghl {
 		static SceneManager* m_instance;
 
 		std::vector<Scene*> m_scenes{};
-		std::vector<PtrFunSystem> m_systems{};
+		std::vector<System*> m_systems{};
 		Scene* m_active_scene{ nullptr };
 	};
 

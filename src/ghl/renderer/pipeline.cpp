@@ -1,6 +1,7 @@
 #include "ghl/renderer/pipeline.hpp"
 #include "ghl/utils/file_system.hpp"
 #include "ghl/core/debug.hpp"
+#include "ghl/core/scene_manager.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -12,47 +13,51 @@ namespace ghl {
 
 	Pipeline* Pipeline::m_instance = nullptr;
 
-	Pipeline::Pipeline() : ApplicationLayer(GHL_PIPELINE_LAYER_NAME) {
+	Pipeline::Pipeline() : ApplicationLayer(GHL_RENDERER_PIPELINE_LAYER_NAME) {
 		GHL_ASSERT(m_instance != nullptr, "Pipeline::Pipeline() -> cannot have mutiple pipeline instances loaded");
 
 		m_instance = this;
 	}
 
 	Pipeline::~Pipeline() {
-		for (Shader& shader : m_shaders) {
-			glDeleteProgram(shader.id);
+		for (PipelineRenderer* renderer : m_renderers) {
+			delete renderer;
 		}
+	}
 
-		for (Texture& texture : m_textures) {
-			glDeleteTextures(1, &texture.id);
+	void Pipeline::push_renderer(PipelineRenderer* renderer) {
+		if (renderer == nullptr) {
+			Debug::log("Pipeline::push_renderer(PipelineRenderer*) -> renderer == nullptr");
+			return;
+		}
+		m_renderers.push_back(renderer);
+	}
+
+	PipelineRenderer* Pipeline::get_renderer(std::string_view name) {
+		for (PipelineRenderer* renderer : m_renderers) {
+			if (renderer->get_name() == name) {
+				return renderer;
+			}
+		}
+		return nullptr;
+	}
+
+	void Pipeline::remove_renderer(std::string_view name) {
+		for (size_t i = 0; i < m_renderers.size(); i++) {
+			if (m_renderers[i]->get_name() == name) {
+				delete m_renderers[i];
+				m_renderers.erase(m_renderers.begin() + i);
+			}
 		}
 	}
 
 	void Pipeline::on_update() {
-
-	}
-
-	Shader* Pipeline::get_shader(std::string_view name) {
-		for (Shader& shader : m_shaders) {
-			if (shader.name == name) {
-				return &shader;
-			}
+		for (PipelineRenderer* renderer : m_renderers) {
+			renderer->on_render();
 		}
-
-		return nullptr;
 	}
 
-	Texture* Pipeline::get_texture(std::string_view name) {
-		for (Texture& texture : m_textures) {
-			if (texture.name == name) {
-				return &texture;
-			}
-		}
-
-		return nullptr;
-	}
-
-	Shader* Pipeline::load_shader(std::string_view name, std::string_view vertex_path, std::string_view fragment_path) {
+	Shader Pipeline::load_shader_into_memory(std::string_view name, std::string_view vertex_path, std::string_view fragment_path) {
 		const char* paths[] = { fragment_path.data(), vertex_path.data() };
 		uint32_t shaders[2] = { 0, 0 };
 
@@ -62,7 +67,7 @@ namespace ghl {
 				if (i == 1) {
 					glDeleteShader(shaders[0]);
 				}
-				return nullptr;
+				return {};
 			}
 
 			std::string source = file.get_source();
@@ -85,6 +90,8 @@ namespace ghl {
 				if (i == 1) {
 					glDeleteShader(shaders[0]);
 				}
+
+				return {};
 			}
 
 			shaders[i] = shader;
@@ -109,28 +116,27 @@ namespace ghl {
 			Debug::log(std::string("Pipeline::load_shader(std::string_view, std::string_view, std::string_view) -> failed to link shader programs") + message, DebugType_Error);
 			std::free(message);
 
-			return nullptr;
+			return {};
 		}
 
-		m_shaders.push_back({ std::string(name), program });
-		return &m_shaders.back();
+		return { name.data(), program };
 	}
 
-	Texture* Pipeline::load_texture(std::string_view name, std::string_view path, bool flip) {
+	Texture Pipeline::load_texture_into_memory(std::string_view name, std::string_view path, bool flip) {
 		stbi_set_flip_vertically_on_load(flip);
 
 		int width, height, channels;
 		uint8_t* buffer = stbi_load(path.data(), &width, &height, &channels, 4);
 		if (buffer == nullptr) {
 			Debug::log("Pipeline::load_texture(std::string_view, std::string_view, bool) -> failed to find file \"" + std::string(path.data()) + "\"", DebugType_Error);
-			return nullptr;
+			return {};
 		}
 
 		uint32_t format = 0;
 		switch (channels) {
 		case 0:
 			Debug::log("Pipeline::load_texture(std::string_view, std::string_view, bool) -> channel format is set to 0 for \"" + std::string(path.data()) + "\"", DebugType_Error);
-			return nullptr;
+			return {};
 		case 1: format = GL_RED;	break;
 		case 2: format = GL_RG;		break;
 		case 3: format = GL_RGB;	break;
@@ -149,25 +155,39 @@ namespace ghl {
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		m_textures.push_back({ name.data(), glm::ivec2(width, height), texture });
-		return &m_textures.back();
+		return { name.data(), glm::ivec2(width, height), texture };
 	}
 
-	void Pipeline::remove_shader(std::string_view name) {
-		for (std::vector<Shader>::iterator shader = m_shaders.begin(); shader != m_shaders.end(); shader++) {
-			if (shader->name == name) {
-				m_shaders.erase(shader);
-				return;
-			}
+	void Pipeline::destroy_shader_gpu_instance(Shader& shader) {
+		glDeleteProgram(shader.id);
+	}
+
+	void Pipeline::destroy_texture_gpu_instance(Texture& texture) {
+		glDeleteTextures(1, &texture.id);
+	}
+
+	BatchRenderer::BatchRenderer() : PipelineRenderer(GHL_PIPELINE_RENDERER_BATCH_NAME) {
+		SceneManager::get()->push_system<BatchRenderer::BatchSystem>(this);
+	}
+
+	void BatchRenderer::on_render() {
+
+	}
+
+	void BatchRenderer::collect_vertex_data_system(entt::registry& registry) {
+
+	}
+
+	BatchRenderer::BatchSystem::BatchSystem(BatchRenderer* renderer) : m_renderer(renderer) {
+
+	}
+
+	void BatchRenderer::BatchSystem::on_render(entt::registry& registry) {
+		if (m_renderer != nullptr) {
+			std::cout << "has renderer reference\n";
 		}
-	}
-
-	void Pipeline::remove_texture(std::string_view name) {
-		for (std::vector<Texture>::iterator texture = m_textures.begin(); texture != m_textures.end(); texture++) {
-			if (texture->name == name) {
-				m_textures.erase(texture);
-				return;
-			}
+		else {
+			std::cout << "doesn't have renderer reference\n";
 		}
 	}
 

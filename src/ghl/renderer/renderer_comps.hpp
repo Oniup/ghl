@@ -29,6 +29,15 @@ namespace ghl {
 		glm::vec2 frame_uv_size{};
 	};
 
+	struct ModelRendererComponent {
+		Model* model{ nullptr };
+		// TODO(Ewan): implement model animations
+	};
+
+	// struct ModelAnimatorComponent {
+
+	// };
+
 	struct RenderSystems {
 		void sprite_renderer_system(entt::registry& registry);
 		void sprite_atlas_animation_system(entt::registry& registry);

@@ -4,7 +4,7 @@ namespace ghl {
 
     Debug* Debug::m_instance = nullptr;
 
-    Debug::Debug() : ApplicationLayer(GHL_DEBUG_LAYER_NAME) {
+    Debug::Debug() : ApplicationLayer(GHL_CORE_DEBUG_LAYER_NAME) {
         GHL_ASSERT(m_instance != nullptr, "Debug::Debug() -> cannot have multiple debug layers");
 
         m_instance = this;
