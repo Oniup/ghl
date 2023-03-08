@@ -30,7 +30,8 @@ namespace ghl {
 	};
 
 	struct ModelRendererComponent {
-		Model* model{ nullptr };
+		Model* asset{ nullptr };
+		// TODO(Ewan): rework how model data is retrieved 
 		// TODO(Ewan): implement model animations
 	};
 

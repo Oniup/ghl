@@ -74,21 +74,27 @@ namespace ghl {
 		virtual ~BatchRenderer() override = default;
 
 		virtual void on_render() override;
-		static void collect_vertex_data_system(entt::registry& registry);
+		void submit(Model::Mesh* mesh, glm::mat4& model_matrix, Material* material);
 
 	private:
-		class BatchSystem : public System {
+		struct _Batch {
+			Shader* shader{};
+			std::vector<Vertex> vertices{};
+			std::vector<uint32_t> indices{};
+			std::vector<Material*> materials{};
+			std::vector<glm::mat4> transforms{};
+		};
+
+		class _BatchSystem : public System {
 		public:
-			BatchSystem(BatchRenderer* renderer);
+			_BatchSystem(BatchRenderer* renderer);
 			virtual void on_render(entt::registry& registry) override;
 
 		private:
 			BatchRenderer* m_renderer{ nullptr };
 		};
 
-		uint32_t m_texture_count{};
-		std::vector<uint32_t> m_indices{};
-		std::vector<Material*> m_materials{};
+		std::vector<_Batch> m_batches{};
 	};
 
 	class Pipeline : public ApplicationLayer {

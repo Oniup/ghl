@@ -2,11 +2,12 @@
 #include "ghl/utils/file_system.hpp"
 #include "ghl/core/debug.hpp"
 #include "ghl/core/scene_manager.hpp"
+#include "ghl/renderer/renderer_comps.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-
-#include <glad/glad.h>
 #include <stb/stb_image.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace ghl {
@@ -167,27 +168,43 @@ namespace ghl {
 	}
 
 	BatchRenderer::BatchRenderer() : PipelineRenderer(GHL_PIPELINE_RENDERER_BATCH_NAME) {
-		SceneManager::get()->push_system<BatchRenderer::BatchSystem>(this);
+		SceneManager::get()->push_system<BatchRenderer::_BatchSystem>(this);
 	}
 
 	void BatchRenderer::on_render() {
 
 	}
 
-	void BatchRenderer::collect_vertex_data_system(entt::registry& registry) {
+	void BatchRenderer::submit(Model::Mesh* mesh, glm::mat4& model_matrix, Material* material) {
+		
+	}
+
+	BatchRenderer::_BatchSystem::_BatchSystem(BatchRenderer* renderer) : m_renderer(renderer) {
 
 	}
 
-	BatchRenderer::BatchSystem::BatchSystem(BatchRenderer* renderer) : m_renderer(renderer) {
-
-	}
-
-	void BatchRenderer::BatchSystem::on_render(entt::registry& registry) {
+	void BatchRenderer::_BatchSystem::on_render(entt::registry& registry) {
 		if (m_renderer != nullptr) {
 			std::cout << "has renderer reference\n";
 		}
 		else {
 			std::cout << "doesn't have renderer reference\n";
+		}
+
+		auto group = registry.group<TransformComponent>(entt::get<ModelRendererComponent>);
+		for (auto entity : group) {
+			// TODO(Ewan): rework how model data is retrieved 
+			TransformComponent& transform = group.get<TransformComponent>(entity);
+			ModelRendererComponent& model = group.get<ModelRendererComponent>(entity);
+
+			glm::mat4 model_matrix = glm::mat4(1.0f);
+			model_matrix = glm::translate(model_matrix, transform.position);
+			model_matrix = glm::scale(model_matrix, transform.scale);
+			model_matrix = glm::rotate(model_matrix, glm::radians(transform.rotation.w), glm::vec3(transform.rotation));
+
+			for (Model::Mesh& mesh : model.asset->meshes) {
+				m_renderer->submit(&mesh, model_matrix, mesh.material);
+			}
 		}
 	}
 
