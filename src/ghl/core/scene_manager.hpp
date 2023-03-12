@@ -46,11 +46,13 @@ namespace ghl {
 		SceneManager();
 		virtual ~SceneManager() override;
 
-		Scene* get(std::string_view name);
-		void remove(std::string_view name);
+		Scene* get_scene(std::string_view name);
+		inline Scene* get_active_scene() { return m_active_scene; }
 
 		Scene* set_active(std::string_view name);
 		void set_active(Scene* scene);
+
+		void remove(std::string_view name);
 
 		Scene* push(std::string_view name);
 		Scene* push(std::string_view name, std::string_view path);

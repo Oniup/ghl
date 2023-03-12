@@ -59,7 +59,6 @@ namespace ghl {
     void Application::_init_required_layers() {
         push_layer(new Window(600, 600, "Test Window"));
         push_layer(new Pipeline());
-        push_layer(new Debug());
         push_layer(new SceneManager());
         push_layer(new AssetHandler());
     }

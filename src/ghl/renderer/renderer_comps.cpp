@@ -2,6 +2,12 @@
 
 namespace ghl {
 
+	ModelRendererComponent::~ModelRendererComponent() {
+		if (!is_static) {
+			delete model;
+		}
+	}
+
 	void RenderSystems::sprite_renderer_system(entt::registry& registry) {
 		// TODO: ...
 	}

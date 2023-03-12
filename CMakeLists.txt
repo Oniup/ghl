@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 
 add_subdirectory(thirdparty/glfw)
+add_subdirectory(thirdparty/assimp)
 
 file(GLOB_RECURSE GHL_HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.hpp")
 file(GLOB_RECURSE GHL_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
@@ -25,12 +26,14 @@ target_include_directories(
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/entt/single_include
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw/include
     PUBLUC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp/include
 )
 
 target_link_libraries(
     ghl
 
     PUBLIC glfw
+    PUBLIC assimp
 )
 
 target_compile_definitions(

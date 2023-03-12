@@ -14,6 +14,131 @@ namespace ghl {
 
 	Pipeline* Pipeline::m_instance = nullptr;
 
+	VertexArrayBuffer::VertexArrayBuffer() : VertexArrayBuffer(true, 0, nullptr, 0, nullptr) {
+	}
+
+	VertexArrayBuffer::VertexArrayBuffer(VertexArrayBuffer&& other) noexcept {
+		*this = std::move(other);
+	}
+
+	VertexArrayBuffer::VertexArrayBuffer(const VertexArrayBuffer& other) {
+		*this = other;
+	}
+
+	VertexArrayBuffer::VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, const float* vertex_data, size_t element_data_size, const uint32_t* element_data) : m_is_dynamic(is_dynamic) {
+		glGenVertexArrays(1, &m_vertex_array);
+		glBindVertexArray(m_vertex_array);
+
+		int draw_state = m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+		glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, draw_state);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, element_data_size, element_data, draw_state);
+
+		m_vertex_buffer_size = vertex_data_size;
+		m_index_buffer_size = element_data_size;
+	}
+
+	VertexArrayBuffer::~VertexArrayBuffer() {
+		if (m_vertex_array != 0) {
+			glDeleteBuffers(1, &m_vertex_buffer);
+			glDeleteBuffers(1, &m_index_buffer);
+			glDeleteVertexArrays(1, &m_vertex_array); 
+		}
+	}
+
+	VertexArrayBuffer& VertexArrayBuffer::operator=(VertexArrayBuffer&& other) noexcept {
+		m_vertex_array = other.m_vertex_array;
+		m_vertex_buffer = other.m_vertex_buffer;
+		m_index_buffer = other.m_index_buffer;
+		m_vertex_buffer_size = other.m_vertex_buffer_size;
+		m_index_buffer_size = other.m_index_buffer_size;
+		m_is_dynamic = other.m_is_dynamic;
+		m_attribute_count = other.m_attribute_count;
+
+		other.m_vertex_array = 0;
+		other.m_vertex_buffer = 0;
+		other.m_index_buffer = 0;
+		other.m_vertex_buffer_size = 0;
+		other.m_index_buffer_size = 0;
+		other.m_is_dynamic = 0;
+		other.m_attribute_count = 0;
+		
+		return *this;
+	}
+
+	VertexArrayBuffer& VertexArrayBuffer::operator=(const VertexArrayBuffer& other) {
+		if (m_vertex_array != 0) {
+			glDeleteBuffers(1, &m_vertex_buffer);
+			glDeleteBuffers(1, &m_index_buffer);
+			glDeleteVertexArrays(1, &m_vertex_array); 
+		}
+
+		m_vertex_array = other.m_vertex_array;
+		m_vertex_buffer = other.m_vertex_buffer;
+		m_index_buffer = other.m_index_buffer;
+		m_vertex_buffer_size = other.m_vertex_buffer_size;
+		m_index_buffer_size = other.m_index_buffer_size;
+		m_is_dynamic = other.m_is_dynamic;
+		m_attribute_count = other.m_attribute_count;
+		
+		return *this;
+	}
+
+	void VertexArrayBuffer::set_attribute(uint32_t element_count, uint32_t stride, int offset) {
+		glEnableVertexAttribArray(m_attribute_count);
+		glVertexAttribPointer(m_attribute_count, element_count, GL_FLOAT, GL_FALSE, stride, (const void*)offset);
+		m_attribute_count++;
+	}
+
+	void VertexArrayBuffer::set_vertex_data(size_t vertices_size, const float* vertices, uint32_t offset) {
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
+
+		if (m_vertex_buffer_size == vertices_size) {
+			glBufferSubData(GL_ARRAY_BUFFER, offset, vertices_size, vertices);
+		}
+		else {
+			glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+			m_vertex_buffer_size = vertices_size;
+		}
+	}
+
+	void VertexArrayBuffer::set_index_data(size_t indices_size, const uint32_t* indices, uint32_t offset) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer);
+
+		if (m_vertex_buffer_size == indices_size) {
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, indices_size, indices);
+		}
+		else {
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+			m_index_buffer_size = indices_size;
+		}
+	}
+
+	void VertexArrayBuffer::bind() {
+		glBindVertexArray(m_vertex_array);
+	}
+
+	void VertexArrayBuffer::unbind() {
+		glBindVertexArray(0);
+	}
+
+	Shader::~Shader() {
+		if (program != 0) {
+			glDeleteProgram(program);
+			program = 0;
+		}
+	}
+
+	Texture::~Texture() {
+		if (image != 0) {
+			glDeleteTextures(1, &image);
+			image = 0;
+			size = glm::ivec2(0, 0);
+		}
+	}
+
 	Pipeline::Pipeline() : ApplicationLayer(GHL_RENDERER_PIPELINE_LAYER_NAME) {
 		GHL_ASSERT(m_instance != nullptr, "Pipeline::Pipeline() -> cannot have mutiple pipeline instances loaded");
 
@@ -159,14 +284,6 @@ namespace ghl {
 		return { name.data(), glm::ivec2(width, height), texture };
 	}
 
-	void Pipeline::destroy_shader_gpu_instance(Shader& shader) {
-		glDeleteProgram(shader.id);
-	}
-
-	void Pipeline::destroy_texture_gpu_instance(Texture& texture) {
-		glDeleteTextures(1, &texture.id);
-	}
-
 	BatchRenderer::BatchRenderer() : PipelineRenderer(GHL_PIPELINE_RENDERER_BATCH_NAME) {
 		SceneManager::get()->push_system<BatchRenderer::_BatchSystem>(this);
 	}
@@ -175,7 +292,7 @@ namespace ghl {
 
 	}
 
-	void BatchRenderer::submit(Model::Mesh* mesh, glm::mat4& model_matrix, Material* material) {
+	void BatchRenderer::submit(Mesh* mesh, glm::mat4& model_matrix, Material* material) {
 		
 	}
 
@@ -184,13 +301,6 @@ namespace ghl {
 	}
 
 	void BatchRenderer::_BatchSystem::on_render(entt::registry& registry) {
-		if (m_renderer != nullptr) {
-			std::cout << "has renderer reference\n";
-		}
-		else {
-			std::cout << "doesn't have renderer reference\n";
-		}
-
 		auto group = registry.group<TransformComponent>(entt::get<ModelRendererComponent>);
 		for (auto entity : group) {
 			// TODO(Ewan): rework how model data is retrieved 
@@ -202,9 +312,9 @@ namespace ghl {
 			model_matrix = glm::scale(model_matrix, transform.scale);
 			model_matrix = glm::rotate(model_matrix, glm::radians(transform.rotation.w), glm::vec3(transform.rotation));
 
-			for (Model::Mesh& mesh : model.asset->meshes) {
-				m_renderer->submit(&mesh, model_matrix, mesh.material);
-			}
+			// for (Mesh& mesh : model.model->meshes) {
+			// 	m_renderer->submit(&mesh, model_matrix, mesh.material);
+			// }
 		}
 	}
 

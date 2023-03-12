@@ -17,7 +17,7 @@ namespace ghl {
 		}
 	}
 
-	Scene* SceneManager::get(std::string_view name) {
+	Scene* SceneManager::get_scene(std::string_view name) {
 		for (Scene* scene : m_scenes) {
 			if (scene->get_name() == name) {
 				return scene;
@@ -66,16 +66,21 @@ namespace ghl {
 	}
 
 	void SceneManager::on_update() {
-		for (System* system : m_systems) {
-			system->on_update(m_active_scene->get_registry());
-		}
+		if (m_active_scene != nullptr) {
+			for (System* system : m_systems) {
+				system->on_update(m_active_scene->get_registry());
+			}
 
-		for (System* system : m_systems) {
-			system->on_late_update(m_active_scene->get_registry());
-		}
+			for (System* system : m_systems) {
+				system->on_late_update(m_active_scene->get_registry());
+			}
 
-		for (System* system : m_systems) {
-			system->on_render(m_active_scene->get_registry());
+			for (System* system : m_systems) {
+				system->on_render(m_active_scene->get_registry());
+			}
+		}
+		else {
+			Debug::log("SceneManager::on_update() -> no active scene\n", DebugType_Warning);
 		}
 	}
 

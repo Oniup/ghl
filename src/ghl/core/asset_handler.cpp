@@ -1,4 +1,9 @@
 #include "ghl/core/asset_handler.hpp"
+#include "ghl/core/debug.hpp"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace ghl {
 
@@ -11,12 +16,8 @@ namespace ghl {
 	}
 
 	AssetHandler::~AssetHandler() {
-		for (Shader& shader : m_shaders) {
-			Pipeline::destroy_shader_gpu_instance(shader);
-		}
-
-		for (Texture& texture : m_textures) {
-			Pipeline::destroy_texture_gpu_instance(texture);
+		for (Model* model : m_static_models) {
+			delete model;
 		}
 	}
 
@@ -30,8 +31,19 @@ namespace ghl {
 		return &m_textures.back();
 	}
 
-	Model* AssetHandler::load_model_into_memory(std::string_view name, std::string_view path) {
-		return nullptr;
+	Model* AssetHandler::load_static_model_into_memory(std::string_view name, std::string_view path, ModelFileType file_type) {
+		m_static_models.resize(m_static_models.size() + 1);
+		m_static_models.back()->name = name;
+
+		_load_mesh_data(m_static_models.back(), path, false, file_type);
+		return m_static_models.back();
+	}
+
+	Model* AssetHandler::load_model_into_memory(std::string_view path, ModelFileType file_type) {
+		Model* model = new Model();
+
+		_load_mesh_data(model, path, true, file_type);
+		return model;
 	}
 
 	Shader* AssetHandler::get_shader(std::string_view name) {
@@ -54,7 +66,7 @@ namespace ghl {
 		return nullptr;
 	}
 
-	Model* AssetHandler::get_model(std::string_view name) {
+	Model* AssetHandler::get_static_model(std::string_view name) {
 		return nullptr;
 	}
 
@@ -66,8 +78,129 @@ namespace ghl {
 		GHL_REMOVE_ELEMENT_FROM_VECTOR_WITH_NAME(Texture, name, name, m_textures)
 	}
 
-	void AssetHandler::remove_model(std::string_view name) {
-		GHL_REMOVE_ELEMENT_FROM_VECTOR_WITH_NAME(Model, name, name, m_models);
+	void AssetHandler::remove_static_model(std::string_view name) {
+		for (size_t i = 0; i < m_static_models.size(); i++) {
+			if (m_static_models[i]->name == name) {
+				delete m_static_models[i];
+				m_static_models.erase(m_static_models.begin() + i);
+				return;
+			}
+		}
+	}
+
+	void AssetHandler::remove_all_shaders() {
+		m_shaders.clear();
+	}
+
+	void AssetHandler::remove_all_textures() {
+		m_textures.clear();
+	}
+
+	void AssetHandler::remove_all_static_models() {
+		for (Model* model : m_static_models) {
+			delete model;
+		}
+		m_static_models.clear();
+	}
+
+	void AssetHandler::_load_mesh_data(Model* model, std::string_view path, bool is_dynamic, ModelFileType file_type) {
+		model->name = std::string(path.data() + std::string(path).find_last_of('/') + 1);
+		std::string full_path = path.data() + std::string("/") + model->name + _get_model_file_type_as_str(file_type);
+
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(full_path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		if (scene == nullptr) {
+			Debug::log("AssetHandler::_load_mesh_data(Model*, std::string_view, bool, ModelFileType) -> failed to load model path \"" + full_path + "\"", DebugType_Error);
+			return;
+		}
+
+		_process_assimp_node(model, scene->mRootNode, scene);
+	}
+
+	void AssetHandler::_set_mesh_vertex_data(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, Material* material, Mesh* mesh, bool is_dynamic) {
+		mesh->vertices = std::move(vertices);
+		mesh->indices = std::move(indices);
+		mesh->material = material;
+
+		mesh->vertex_array_buffer.bind();
+		mesh->vertex_array_buffer.is_dynamic() = is_dynamic;
+		mesh->vertex_array_buffer.set_vertex_data(mesh->vertices.size() * (sizeof(vertices) / sizeof(float)), reinterpret_cast<float*>(mesh->vertices.data()));
+		mesh->vertex_array_buffer.set_index_data(mesh->indices.size(), mesh->indices.data());
+		mesh->vertex_array_buffer.set_attribute(3, sizeof(Vertex), offsetof(Vertex, position));
+		mesh->vertex_array_buffer.set_attribute(3, sizeof(Vertex), offsetof(Vertex, normal));
+		mesh->vertex_array_buffer.set_attribute(2, sizeof(Vertex), offsetof(Vertex, uv));
+		mesh->vertex_array_buffer.unbind();
+	}
+
+	void AssetHandler::_process_assimp_node(Model* model, aiNode* node, const aiScene* scene) {
+		for (uint32_t i = 0; i < node->mNumMeshes; i++) {
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			model->meshes.emplace_back(_process_assimp_mesh(mesh, scene));
+		}
+		for (uint32_t i = 0; i < node->mNumChildren; i++) {
+			_process_assimp_node(model, node->mChildren[i], scene);
+		}
+	}
+
+	Mesh AssetHandler::_process_assimp_mesh(aiMesh* mesh, const aiScene* scene) {
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
+		// TODO(Ewan): load material
+
+		for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
+			Vertex vertex;
+			vertex.position = glm::vec3(
+				mesh->mVertices[i].x,
+				mesh->mVertices[i].y,
+				mesh->mVertices[i].z
+			);
+			vertex.normal = glm::vec3(
+				mesh->mNormals[i].x,
+				mesh->mNormals[i].y,
+				mesh->mNormals[i].z
+			);
+			if (mesh->mTextureCoords[0]) {
+				vertex.uv = glm::vec2(
+					mesh->mTextureCoords[0][i].x,
+					mesh->mTextureCoords[0][i].y
+				);
+			}
+
+			vertices.push_back(vertex);
+		}
+
+		for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
+			aiFace face = mesh->mFaces[i];
+			for (uint32_t j = 0; j < face.mNumIndices; j++) {
+				indices.push_back(face.mIndices[j]);
+			}
+		}
+
+		return Mesh{ VertexArrayBuffer(true, vertices.size(), nullptr, indices.size(), nullptr), vertices, indices };
+	}
+
+	std::string AssetHandler::_get_model_file_type_as_str(ModelFileType file_type) const {
+		std::string str{};
+
+		switch (file_type) {
+		case ModelFileType_Obj:
+			 str = ".obj";
+			break;
+		case ModelFileType_Blender:
+			 str = ".blend";
+			break;
+		case ModelFileType_Gltf:
+			 str = ".gltf";
+			break;
+		case ModelFileType_Stl:
+			 str = ".stl";
+			break;
+		case ModelFileType_Fbx:
+			 str = ".fbx";
+			break;
+		}
+
+		return str;
 	}
 
 }

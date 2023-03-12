@@ -7,6 +7,43 @@
 
 namespace ghl {
 
+	class VertexArrayBuffer {
+	public:
+		VertexArrayBuffer();
+		VertexArrayBuffer(VertexArrayBuffer&& other) noexcept;
+		// only use this for temporary copying, as they both share the same vertex array index
+		VertexArrayBuffer(const VertexArrayBuffer& other);
+		VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, const float* vertex_data, size_t element_data_size, const uint32_t* element_data);
+		~VertexArrayBuffer();
+
+		VertexArrayBuffer& operator=(VertexArrayBuffer&& other) noexcept;
+		// only use this for temporary copying, as they both share the same vertex array index
+		VertexArrayBuffer& operator=(const VertexArrayBuffer& other);
+
+		inline bool& is_dynamic() { return m_is_dynamic; }
+		inline bool is_dynamic() const { return m_is_dynamic; }
+		inline uint32_t get_vertex_array() const { return m_vertex_array; }
+		inline uint32_t get_vertex_buffer() const { return m_vertex_buffer; }
+		inline uint32_t get_element_buffer() const { return m_index_buffer; }
+		inline uint32_t get_attribute_size() const { return m_attribute_count; }
+
+		void set_attribute(uint32_t element_count, uint32_t stride, int offset);
+		void set_vertex_data(size_t vertices_size, const float* vertices, uint32_t offset = 0);
+		void set_index_data(size_t indices_size, const uint32_t* indices, uint32_t offset = 0);
+
+		void bind();
+		void unbind();
+
+	private:
+		bool m_is_dynamic{ true };
+		uint32_t m_vertex_array{};
+		uint32_t m_vertex_buffer{};
+		uint32_t m_index_buffer{};
+		uint32_t m_attribute_count{};
+		size_t m_vertex_buffer_size{};
+		size_t m_index_buffer_size{};
+	};
+
 	struct Vertex {
 		glm::vec3 position{};
 		glm::vec3 normal{};
@@ -14,42 +51,59 @@ namespace ghl {
 	};
 
 	struct Shader {
-		~Shader() = default;
-
 		std::string name{};
-		uint32_t id{};
+		uint32_t program{};
+
+		~Shader();
 	};
 
 	struct Texture {
-		~Texture() = default;
-
 		std::string name{};
 		glm::ivec2 size{};
-		uint32_t id{};
+		uint32_t image{};
+
+		~Texture();
+	};
+
+	// TODO(Ewan): updated to support PBR rendering
+	enum MaterialTextureType {
+		MaterialTextureType_Diffuse = 0,
+		MaterialTextureType_Specular,
+		MaterialTextureType_Ambient,
 	};
 
 	struct Material {
-		~Material() = default;
-
 		std::string name{};
 		Shader* shader{ nullptr };
-		std::vector<Texture*> textures{};
+		std::vector<std::tuple<Texture*, MaterialTextureType>> textures{};
 		float shininess{};
+
+		~Material() = default;
+	};
+
+	// TODO(Ewan): this needs to change for release runtime application, for editing the game its fine
+	enum ModelFileType {
+		ModelFileType_Obj = 0,
+		ModelFileType_Blender,
+		ModelFileType_Gltf,
+		ModelFileType_Stl,
+		ModelFileType_Fbx
+	};
+
+	struct Mesh {
+		VertexArrayBuffer vertex_array_buffer{};
+		std::vector<Vertex> vertices{};
+		std::vector<uint32_t> indices{};
+		Material* material{ nullptr };
+
+		~Mesh() = default;
 	};
 
 	struct Model {
-		struct Mesh {
-			~Mesh() = default;
-
-			std::vector<Vertex> vertices{};
-			std::vector<uint32_t> indices{};
-			Material* material{ nullptr };
-		};
-
-		~Model() = default;
-
 		std::string name{};
 		std::vector<Mesh> meshes{};
+
+		~Model() = default;
 	};
 
 	class PipelineRenderer {
@@ -74,7 +128,7 @@ namespace ghl {
 		virtual ~BatchRenderer() override = default;
 
 		virtual void on_render() override;
-		void submit(Model::Mesh* mesh, glm::mat4& model_matrix, Material* material);
+		void submit(Mesh* mesh, glm::mat4& model_matrix, Material* material);
 
 	private:
 		struct _Batch {
@@ -103,9 +157,6 @@ namespace ghl {
 
 		static Shader load_shader_into_memory(std::string_view name, std::string_view vertex_path, std::string_view fragment_path);
 		static Texture load_texture_into_memory(std::string_view name, std::string_view path, bool flip);
-
-		static void destroy_shader_gpu_instance(Shader& shader);
-		static void destroy_texture_gpu_instance(Texture& texture);
 
 		Pipeline();
 		virtual ~Pipeline() override;

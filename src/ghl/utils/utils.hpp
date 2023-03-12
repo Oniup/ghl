@@ -56,5 +56,20 @@
 			}\
 		}\
 
+namespace ghl {
+       
+    inline void print_vec2(const glm::vec2& vec) {
+        std::cout << vec.x << ", " << vec.y;
+    }
+
+    inline void print_vec3(const glm::vec3& vec) {
+        std::cout << vec.x << ", " << vec.y << ", " << vec.z;
+    }
+    
+    inline void print_vec4(const glm::vec4& vec) {
+        std::cout << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w;
+    }
+
+}
 
 #endif
