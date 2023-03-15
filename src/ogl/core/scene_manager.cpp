@@ -1,12 +1,12 @@
-#include "ghl/core/scene_manager.hpp"
-#include "ghl/core/debug.hpp"
+#include "ogl/core/scene_manager.hpp"
+#include "ogl/core/debug.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	SceneManager* SceneManager::m_instance = nullptr;
 
-	SceneManager::SceneManager() : ApplicationLayer(GHL_CORE_SCENE_MANAGER_LAYER_NAME) {
-		GHL_ASSERT(m_instance != nullptr, "SceneManager::SceneManager() -> cannot have multiple scene manager layers");
+	SceneManager::SceneManager() : ApplicationLayer(OGL_CORE_SCENE_MANAGER_LAYER_NAME) {
+		OGL_ASSERT(m_instance != nullptr, "SceneManager::SceneManager() -> cannot have multiple scene manager layers");
 
 		m_instance = this;
 	}
@@ -60,7 +60,7 @@ namespace ghl {
 	}
 
 	void SceneManager::set_active(Scene* scene) {
-		GHL_ASSERT(scene == nullptr, "SceneManager::set_active(Scene*) -> scene is null");
+		OGL_ASSERT(scene == nullptr, "SceneManager::set_active(Scene*) -> scene is null");
 
 		m_active_scene = scene;
 	}

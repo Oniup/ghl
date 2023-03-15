@@ -1,7 +1,7 @@
-#include "ghl/utils/file_system.hpp"
-#include "ghl/core/debug.hpp"
+#include "ogl/utils/file_system.hpp"
+#include "ogl/core/debug.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	File::File(std::string_view path) : File(path, FileOpenState_Read) {
 	}
@@ -54,7 +54,7 @@ namespace ghl {
 			return length;
 		}
 
-		return GHL_FILE_CANNOT_READ_LENGTH;
+		return OGL_FILE_CANNOT_READ_LENGTH;
 	}
 
 	bool File::is_readable() const {

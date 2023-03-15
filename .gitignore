@@ -4,12 +4,12 @@
 build
 bin
 Debug
-ghl.dir
+ogl.dir
 
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
-ghl.sln
+ogl.sln
 
 cmake_install.cmake
 CMakeCache.txt

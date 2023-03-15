@@ -1,12 +1,12 @@
-#ifndef __GHL_RENDERER_PIPELINE_HPP__
-#define __GHL_RENDERER_PIPELINE_HPP__
+#ifndef __OGL_RENDERER_PIPELINE_HPP__
+#define __OGL_RENDERER_PIPELINE_HPP__
 
-#include "ghl/utils/utils.hpp"
-#include "ghl/core/application_layer.hpp"
-#include "ghl/core/scene_manager.hpp"
-#include "ghl/renderer/window.hpp"
+#include "ogl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
+#include "ogl/core/scene_manager.hpp"
+#include "ogl/renderer/window.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	class VertexArrayBuffer {
 	public:

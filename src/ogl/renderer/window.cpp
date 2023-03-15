@@ -1,12 +1,12 @@
-#include "ghl/renderer/window.hpp"
+#include "ogl/renderer/window.hpp"
 
 #include <iostream>
 
-namespace ghl {
+namespace ogl {
 
     bool Window::m_glfw_init = false;
 
-    Window::Window(int width, int height, std::string_view title) : ApplicationLayer(GHL_RENDERER_WINDOW_LAYER_NAME), m_width(width), m_height(height), m_title(title) {
+    Window::Window(int width, int height, std::string_view title) : ApplicationLayer(OGL_RENDERER_WINDOW_LAYER_NAME), m_width(width), m_height(height), m_title(title) {
         if (!m_glfw_init) {
             glfwInit();
         }
@@ -59,7 +59,7 @@ namespace ghl {
         }
 
         glfwMakeContextCurrent(m_internal);
-        GHL_ASSERT(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Window::_init_internal_window() -> failed to initialize glad");
+        OGL_ASSERT(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Window::_init_internal_window() -> failed to initialize glad");
         glViewport(0, 0, m_width, m_height);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);

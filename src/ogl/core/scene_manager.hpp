@@ -1,10 +1,10 @@
-#ifndef __GHL_CORE_SCENE_MANAGER_HPP__
-#define __GHL_CORE_SCENE_MANAGER_HPP__
+#ifndef __OGL_CORE_SCENE_MANAGER_HPP__
+#define __OGL_CORE_SCENE_MANAGER_HPP__
 
-#include "ghl/utils/utils.hpp"
-#include "ghl/core/application_layer.hpp"
+#include "ogl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	class System {
 	public:

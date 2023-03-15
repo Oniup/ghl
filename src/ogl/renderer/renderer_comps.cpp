@@ -1,6 +1,6 @@
-#include "ghl/renderer/renderer_comps.hpp"
+#include "ogl/renderer/renderer_comps.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	ModelRendererComponent::~ModelRendererComponent() {
 		if (!is_static && model != nullptr) {

@@ -1,22 +1,22 @@
-#include "ghl/core/asset_handler.hpp"
-#include "ghl/core/debug.hpp"
+#include "ogl/core/asset_handler.hpp"
+#include "ogl/core/debug.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-namespace ghl {
+namespace ogl {
 
 	AssetHandler* AssetHandler::m_instance = nullptr;
 
-	AssetHandler::AssetHandler() : ApplicationLayer(GHL_CORE_ASSET_HANDLER_NAME) {
-		GHL_ASSERT(m_instance != nullptr, "AssetHandler::AssetHandler() -> cannot created multiple asset handler application layers");
+	AssetHandler::AssetHandler() : ApplicationLayer(OGL_CORE_ASSET_HANDLER_NAME) {
+		OGL_ASSERT(m_instance != nullptr, "AssetHandler::AssetHandler() -> cannot created multiple asset handler application layers");
 
 		m_instance = this;
 
 		// TODO(Ewan): change to read in a already compiled shader for the defaults
-		Shader* shader = load_shader_into_memory(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME, GHL_ASSET_SHADER_PHONG_DEFAULT_VERT_PATH, GHL_ASSET_SHADER_PHONG_DEFAULT_FRAG_PATH);
-		Material* material = load_material_into_memory(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
+		Shader* shader = load_shader_into_memory(OGL_ASSET_MATERIAL_PHONG_DEFAULT_NAME, OGL_ASSET_SHADER_PHONG_DEFAULT_VERT_PATH, OGL_ASSET_SHADER_PHONG_DEFAULT_FRAG_PATH);
+		Material* material = load_material_into_memory(OGL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
 		material->shader = shader;
 	}
 
@@ -243,7 +243,7 @@ namespace ghl {
 		return str;
 	}
 
-	NonRunTimeAssetHandler::NonRunTimeAssetHandler() : ApplicationLayer(GHL_CORE_NON_RUNTIME_ASSET_HANDLER_NAME) {
+	NonRunTimeAssetHandler::NonRunTimeAssetHandler() : ApplicationLayer(OGL_CORE_NON_RUNTIME_ASSET_HANDLER_NAME) {
 
 	}
 

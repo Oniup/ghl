@@ -1,13 +1,13 @@
-#ifndef __GHL_RENDERER_WINDOW_HPP__
-#define __GHL_RENDERER_WINDOW_HPP__
+#ifndef __OGL_RENDERER_WINDOW_HPP__
+#define __OGL_RENDERER_WINDOW_HPP__
 
-#include "ghl/core/application_layer.hpp"
-#include "ghl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
+#include "ogl/utils/utils.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace ghl {
+namespace ogl {
 
     class Window : public ApplicationLayer {
     public:

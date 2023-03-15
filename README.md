@@ -1,3 +1,3 @@
-# GHL Game Engine
+# OGL Game Engine
 
 built by an idiot

@@ -1,10 +1,10 @@
-#ifndef __GHL_CORE_DEBUG_HPP__
-#define __GHL_CORE_DEBUG_HPP__
+#ifndef __OGL_CORE_DEBUG_HPP__
+#define __OGL_CORE_DEBUG_HPP__
 
-#include "ghl/core/application_layer.hpp"
-#include "ghl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
+#include "ogl/utils/utils.hpp"
 
-namespace ghl {
+namespace ogl {
 
     enum DebugType {
         DebugType_Message = 0,
@@ -12,7 +12,7 @@ namespace ghl {
         DebugType_Error,
     };
 
-    class Debug : public ghl::ApplicationLayer {
+    class Debug : public ogl::ApplicationLayer {
     public:
         Debug();
         virtual ~Debug() override = default;

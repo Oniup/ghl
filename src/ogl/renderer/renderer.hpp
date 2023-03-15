@@ -1,10 +1,10 @@
-#ifndef __GHL_RENDERER_RENDERER_HPP__
-#define __GHL_RENDERER_RENDERER_HPP__
+#ifndef __OGL_RENDERER_RENDERER_HPP__
+#define __OGL_RENDERER_RENDERER_HPP__
 
-#include "ghl/utils/utils.hpp" 
-#include "ghl/renderer/pipeline.hpp"
+#include "ogl/utils/utils.hpp" 
+#include "ogl/renderer/pipeline.hpp"
 
-namespace ghl {
+namespace ogl {
 
 	class BasicRenderer : public PipelineRenderer {
 	public:

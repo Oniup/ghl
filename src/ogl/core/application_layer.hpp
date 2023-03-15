@@ -1,9 +1,9 @@
-#ifndef __GHL_CORE_APPLICATION_LAYER_HPP__
-#define __GHL_CORE_APPLICATION_LAYER_HPP__
+#ifndef __OGL_CORE_APPLICATION_LAYER_HPP__
+#define __OGL_CORE_APPLICATION_LAYER_HPP__
 
-#include "ghl/utils/utils.hpp"
+#include "ogl/utils/utils.hpp"
 
-namespace ghl {
+namespace ogl {
 
     class ApplicationLayer {
     public:

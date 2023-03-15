@@ -1,21 +1,21 @@
-#ifndef __GHL_CORE_ASSET_HANDLER_HPP__
-#define __GHL_CORE_ASSET_HANDLER_HPP__
+#ifndef __OGL_CORE_ASSET_HANDLER_HPP__
+#define __OGL_CORE_ASSET_HANDLER_HPP__
 
-#include "ghl/utils/utils.hpp"
-#include "ghl/core/application_layer.hpp"
-#include "ghl/renderer/pipeline.hpp"
+#include "ogl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
+#include "ogl/renderer/pipeline.hpp"
 
 struct aiMesh;
 struct aiScene;
 struct aiNode;
 
-#define GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME		"phong default"
-#define GHL_ASSET_SHADER_PHONG_DEFAULT_FRAG_PATH	"ghl/assets/shaders/phong_default.frag"
-#define GHL_ASSET_SHADER_PHONG_DEFAULT_VERT_PATH	"ghl/assets/shaders/phong_default.vert"
+#define OGL_ASSET_MATERIAL_PHONG_DEFAULT_NAME		"phong default"
+#define OGL_ASSET_SHADER_PHONG_DEFAULT_FRAG_PATH	"ogl/assets/shaders/phong_default.frag"
+#define OGL_ASSET_SHADER_PHONG_DEFAULT_VERT_PATH	"ogl/assets/shaders/phong_default.vert"
 
-#define GHL_ASSET_SHADER_PBR_DEFAULT_NAME			"pbr default"
+#define OGL_ASSET_SHADER_PBR_DEFAULT_NAME			"pbr default"
 
-namespace ghl {
+namespace ogl {
 
 	typedef int LoadModelProcessStep;
 

@@ -1,12 +1,12 @@
-#ifndef __GHL_RENDERER_COMPONENTS_HPP__
-#define __GHL_RENDERER_COMPONENTS_HPP__
+#ifndef __OGL_RENDERER_COMPONENTS_HPP__
+#define __OGL_RENDERER_COMPONENTS_HPP__
 
-#include "ghl/utils/utils.hpp"
-#include "ghl/renderer/pipeline.hpp"
+#include "ogl/utils/utils.hpp"
+#include "ogl/renderer/pipeline.hpp"
 
 #include <entt/entt.hpp>
 
-namespace ghl {
+namespace ogl {
 
 	struct TransformComponent {
 		glm::vec3 position{ 0.0f, 0.0f, 0.0f };
@@ -15,8 +15,8 @@ namespace ghl {
 	};
 
 	struct SpriteRendererComponent {
-		ghl::Shader* shader{ nullptr };
-		ghl::Texture* texture{ nullptr };
+		ogl::Shader* shader{ nullptr };
+		ogl::Texture* texture{ nullptr };
 		glm::vec2 uv{};
 	};
 

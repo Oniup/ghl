@@ -3,22 +3,22 @@ cmake_minimum_required(VERSION 3.2)
 add_subdirectory(thirdparty/glfw)
 add_subdirectory(thirdparty/assimp)
 
-file(GLOB_RECURSE GHL_HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.hpp")
-file(GLOB_RECURSE GHL_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
+file(GLOB_RECURSE OGL_HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.hpp")
+file(GLOB_RECURSE OGL_SOURCE_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
 
 add_library(
-    ghl STATIC
+    ogl STATIC
 
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include/glad/glad.h
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include/KHR/khrplatform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/src/glad.c
 
-    ${GHL_HEADER_FILES}
-    ${GHL_SOURCE_FILES}
+    ${OGL_HEADER_FILES}
+    ${OGL_SOURCE_FILES}
 )
 
 target_include_directories(
-    ghl
+    ogl
 
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
@@ -30,20 +30,20 @@ target_include_directories(
 )
 
 target_link_libraries(
-    ghl
+    ogl
 
     PUBLIC glfw
     PUBLIC assimp
 )
 
 target_compile_definitions(
-    ghl PUBLIC 
+    ogl PUBLIC 
 
     _CRT_NONSTDC_NO_WARNINGS
 )
 
 set_target_properties(
-    ghl
+    ogl
 
     PROPERTIES
     CXX_STANDARD 20

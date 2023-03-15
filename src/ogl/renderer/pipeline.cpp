@@ -1,8 +1,8 @@
-#include "ghl/renderer/pipeline.hpp"
-#include "ghl/utils/file_system.hpp"
-#include "ghl/core/debug.hpp"
-#include "ghl/core/scene_manager.hpp"
-#include "ghl/renderer/renderer_comps.hpp"
+#include "ogl/renderer/pipeline.hpp"
+#include "ogl/utils/file_system.hpp"
+#include "ogl/core/debug.hpp"
+#include "ogl/core/scene_manager.hpp"
+#include "ogl/renderer/renderer_comps.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -10,7 +10,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace ghl {
+namespace ogl {
 
 	Pipeline* Pipeline::m_instance = nullptr;
 
@@ -126,8 +126,8 @@ namespace ghl {
 		glBindVertexArray(0);
 	}
 
-	Pipeline::Pipeline(Window* window_layer) : ApplicationLayer(GHL_RENDERER_PIPELINE_LAYER_NAME) {
-		GHL_ASSERT(m_instance != nullptr, "Pipeline::Pipeline() -> cannot have mutiple pipeline instances loaded");
+	Pipeline::Pipeline(Window* window_layer) : ApplicationLayer(OGL_RENDERER_PIPELINE_LAYER_NAME) {
+		OGL_ASSERT(m_instance != nullptr, "Pipeline::Pipeline() -> cannot have mutiple pipeline instances loaded");
 
 		m_instance = this;
 		m_window_layer = window_layer;

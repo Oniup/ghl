@@ -1,15 +1,15 @@
-#include "ghl/renderer/renderer.hpp"
-#include "ghl/renderer/renderer_comps.hpp"
-#include "ghl/core/asset_handler.hpp"
-#include "ghl/renderer/window.hpp"
-#include "ghl/core/debug.hpp"
+#include "ogl/renderer/renderer.hpp"
+#include "ogl/renderer/renderer_comps.hpp"
+#include "ogl/core/asset_handler.hpp"
+#include "ogl/renderer/window.hpp"
+#include "ogl/core/debug.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glad/glad.h>
 
-namespace ghl {
+namespace ogl {
 
-	BasicRenderer::BasicRenderer() : PipelineRenderer(GHL_PIPELINE_RENDERER_BATCH_NAME) {
+	BasicRenderer::BasicRenderer() : PipelineRenderer(OGL_PIPELINE_RENDERER_BATCH_NAME) {
 		SceneManager::get()->push_system<BasicRenderer::_CollectData>(this);
 
 		m_vertex_array.bind();
@@ -51,11 +51,11 @@ namespace ghl {
 			// TODO(Ewan): add this after being able to render the cube
 			material = mesh->material;
 			if (material->shader == nullptr) {
-				material->shader = AssetHandler::get()->get_shader(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
+				material->shader = AssetHandler::get()->get_shader(OGL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
 			}
 		}
 		else {
-			material = AssetHandler::get()->get_material(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
+			material = AssetHandler::get()->get_material(OGL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
 		}
 		m_render_passes.push_back({ material, mesh, model_matrix });
 	}

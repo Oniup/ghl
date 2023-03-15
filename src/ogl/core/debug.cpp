@@ -1,11 +1,11 @@
-#include "ghl/core/debug.hpp"
+#include "ogl/core/debug.hpp"
 
-namespace ghl {
+namespace ogl {
 
     Debug* Debug::m_instance = nullptr;
 
-    Debug::Debug() : ApplicationLayer(GHL_CORE_DEBUG_LAYER_NAME) {
-        GHL_ASSERT(m_instance != nullptr, "Debug::Debug() -> cannot have multiple debug layers");
+    Debug::Debug() : ApplicationLayer(OGL_CORE_DEBUG_LAYER_NAME) {
+        OGL_ASSERT(m_instance != nullptr, "Debug::Debug() -> cannot have multiple debug layers");
 
         m_instance = this;
     }

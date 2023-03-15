@@ -1,11 +1,11 @@
-#ifndef __GHL_UTILS_FILE_HPP__
-#define __GHL_UTILS_FILE_HPP__
+#ifndef __OGL_UTILS_FILE_HPP__
+#define __OGL_UTILS_FILE_HPP__
 
-#include "ghl/utils/utils.hpp"
+#include "ogl/utils/utils.hpp"
 
-#define GHL_FILE_CANNOT_READ_LENGTH std::numeric_limits<size_t>().max()
+#define OGL_FILE_CANNOT_READ_LENGTH std::numeric_limits<size_t>().max()
 
-namespace ghl {
+namespace ogl {
 
 	enum FileOpenState {
 		FileOpenState_Closed = 0,

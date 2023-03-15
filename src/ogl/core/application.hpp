@@ -1,12 +1,12 @@
-#ifndef __GHL_CORE_APPLICATION_HPP__
-#define __GHL_CORE_APPLICATION_HPP__
+#ifndef __OGL_CORE_APPLICATION_HPP__
+#define __OGL_CORE_APPLICATION_HPP__
 
-#include "ghl/utils/utils.hpp"
-#include "ghl/core/application_layer.hpp"
-#include "ghl/renderer/window.hpp"
-#include "ghl/core/debug.hpp"
+#include "ogl/utils/utils.hpp"
+#include "ogl/core/application_layer.hpp"
+#include "ogl/renderer/window.hpp"
+#include "ogl/core/debug.hpp"
 
-namespace ghl {
+namespace ogl {
 
     class Application {
     public:
