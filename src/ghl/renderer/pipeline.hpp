@@ -4,6 +4,7 @@
 #include "ghl/utils/utils.hpp"
 #include "ghl/core/application_layer.hpp"
 #include "ghl/core/scene_manager.hpp"
+#include "ghl/renderer/window.hpp"
 
 namespace ghl {
 
@@ -13,7 +14,7 @@ namespace ghl {
 		VertexArrayBuffer(VertexArrayBuffer&& other) noexcept;
 		// only use this for temporary copying, as they both share the same vertex array index
 		VertexArrayBuffer(const VertexArrayBuffer& other);
-		VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, const float* vertex_data, size_t element_data_size, const uint32_t* element_data);
+		VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, size_t vertex_data_type_size, const void* vertex_data, size_t element_data_size, const uint32_t* element_data);
 		~VertexArrayBuffer();
 
 		VertexArrayBuffer& operator=(VertexArrayBuffer&& other) noexcept;
@@ -22,13 +23,16 @@ namespace ghl {
 
 		inline bool& is_dynamic() { return m_is_dynamic; }
 		inline bool is_dynamic() const { return m_is_dynamic; }
+
+		inline size_t get_vertex_buffer_size() const { return m_vertex_buffer_size; }
+		inline size_t get_index_buffer_size() const { return m_index_buffer_size; }
 		inline uint32_t get_vertex_array() const { return m_vertex_array; }
 		inline uint32_t get_vertex_buffer() const { return m_vertex_buffer; }
 		inline uint32_t get_element_buffer() const { return m_index_buffer; }
-		inline uint32_t get_attribute_size() const { return m_attribute_count; }
+		inline uint32_t get_attribute_count() const { return m_attribute_count; }
 
 		void set_attribute(uint32_t element_count, uint32_t stride, int offset);
-		void set_vertex_data(size_t vertices_size, const float* vertices, uint32_t offset = 0);
+		void set_vertex_data(size_t vertices_size, size_t vertex_type_size, const void* vertices, uint32_t offset = 0);
 		void set_index_data(size_t indices_size, const uint32_t* indices, uint32_t offset = 0);
 
 		void bind();
@@ -54,7 +58,7 @@ namespace ghl {
 		std::string name{};
 		uint32_t program{};
 
-		~Shader();
+		~Shader() = default;
 	};
 
 	struct Texture {
@@ -62,7 +66,7 @@ namespace ghl {
 		glm::ivec2 size{};
 		uint32_t image{};
 
-		~Texture();
+		~Texture() = default;
 	};
 
 	// TODO(Ewan): updated to support PBR rendering
@@ -91,7 +95,6 @@ namespace ghl {
 	};
 
 	struct Mesh {
-		VertexArrayBuffer vertex_array_buffer{};
 		std::vector<Vertex> vertices{};
 		std::vector<uint32_t> indices{};
 		Material* material{ nullptr };
@@ -122,45 +125,19 @@ namespace ghl {
 		std::string m_name{};
 	};
 
-	class BatchRenderer : public PipelineRenderer {
-	public:
-		BatchRenderer();
-		virtual ~BatchRenderer() override = default;
-
-		virtual void on_render() override;
-		void submit(Mesh* mesh, glm::mat4& model_matrix, Material* material);
-
-	private:
-		struct _Batch {
-			Shader* shader{};
-			std::vector<Vertex> vertices{};
-			std::vector<uint32_t> indices{};
-			std::vector<Material*> materials{};
-			std::vector<glm::mat4> transforms{};
-		};
-
-		class _BatchSystem : public System {
-		public:
-			_BatchSystem(BatchRenderer* renderer);
-			virtual void on_render(entt::registry& registry) override;
-
-		private:
-			BatchRenderer* m_renderer{ nullptr };
-		};
-
-		std::vector<_Batch> m_batches{};
-	};
-
 	class Pipeline : public ApplicationLayer {
 	public:
 		static inline Pipeline* get() { return m_instance; }
 
 		static Shader load_shader_into_memory(std::string_view name, std::string_view vertex_path, std::string_view fragment_path);
 		static Texture load_texture_into_memory(std::string_view name, std::string_view path, bool flip);
+		static void destroy_shader_resource(Shader* shader);
+		static void destroy_texture_resource(Texture* texture);
 
-		Pipeline();
+		Pipeline(Window* window_layer);
 		virtual ~Pipeline() override;
 
+		Window* get_window() { return m_window_layer; }
 		void push_renderer(PipelineRenderer* renderer);
 		PipelineRenderer* get_renderer(std::string_view name);
 		void remove_renderer(std::string_view name);
@@ -171,6 +148,7 @@ namespace ghl {
 		static Pipeline* m_instance;
 
 		std::vector<PipelineRenderer*> m_renderers{};
+		Window* m_window_layer{ nullptr };
 	};
 
 }

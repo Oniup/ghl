@@ -13,9 +13,22 @@ namespace ghl {
 		GHL_ASSERT(m_instance != nullptr, "AssetHandler::AssetHandler() -> cannot created multiple asset handler application layers");
 
 		m_instance = this;
+
+		// TODO(Ewan): change to read in a already compiled shader for the defaults
+		Shader* shader = load_shader_into_memory(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME, GHL_ASSET_SHADER_PHONG_DEFAULT_VERT_PATH, GHL_ASSET_SHADER_PHONG_DEFAULT_FRAG_PATH);
+		Material* material = load_material_into_memory(GHL_ASSET_MATERIAL_PHONG_DEFAULT_NAME);
+		material->shader = shader;
 	}
 
 	AssetHandler::~AssetHandler() {
+		for (Shader& shader : m_shaders) {
+			Pipeline::destroy_shader_resource(&shader);
+		}
+
+		for (Texture& texture : m_textures) {
+			Pipeline::destroy_texture_resource(&texture);
+		}
+
 		for (Model* model : m_static_models) {
 			delete model;
 		}
@@ -29,6 +42,11 @@ namespace ghl {
 	Texture* AssetHandler::load_texture_into_memory(std::string_view name, std::string_view path, bool flip) {
 		m_textures.push_back(Pipeline::load_texture_into_memory(name, path, flip));
 		return &m_textures.back();
+	}
+
+	Material* AssetHandler::load_material_into_memory(std::string_view name) {
+		m_materials.push_back({ name.data() });
+		return &m_materials.back();
 	}
 
 	Model* AssetHandler::load_static_model_into_memory(std::string_view name, std::string_view path, ModelFileType file_type) {
@@ -66,16 +84,47 @@ namespace ghl {
 		return nullptr;
 	}
 
+	Material* AssetHandler::get_material(std::string_view name) {
+		for (Material& material : m_materials) {
+			if (material.name == name) {
+				return &material;
+			}
+		}
+
+		return nullptr;
+	}
+
 	Model* AssetHandler::get_static_model(std::string_view name) {
 		return nullptr;
 	}
 
 	void AssetHandler::remove_shader(std::string_view name) {
-		GHL_REMOVE_ELEMENT_FROM_VECTOR_WITH_NAME(Shader, name, name, m_shaders)
+		for (std::vector<Shader>::iterator shader = m_shaders.begin(); shader != m_shaders.end(); shader++) {
+			if (shader->name == name) {
+				Pipeline::destroy_shader_resource(&*shader);
+				m_shaders.erase(shader);
+				return;
+			}
+		}
 	}
 
 	void AssetHandler::remove_texture(std::string_view name) {
-		GHL_REMOVE_ELEMENT_FROM_VECTOR_WITH_NAME(Texture, name, name, m_textures)
+		for (std::vector<Texture>::iterator texture = m_textures.begin(); texture != m_textures.end(); texture++) {
+			if (texture->name == name) {
+				Pipeline::destroy_texture_resource(&*texture);
+				m_textures.erase(texture);
+				return;
+			}
+		}
+	}
+
+	void AssetHandler::remove_material(std::string_view name) {
+		for (std::vector<Material>::iterator material = m_materials.begin(); material != m_materials.end(); material++) {
+			if (material->name == name) {
+				m_materials.erase(material);
+				return;
+			}
+		}
 	}
 
 	void AssetHandler::remove_static_model(std::string_view name) {
@@ -103,12 +152,12 @@ namespace ghl {
 		m_static_models.clear();
 	}
 
-	void AssetHandler::_load_mesh_data(Model* model, std::string_view path, bool is_dynamic, ModelFileType file_type) {
+	void AssetHandler::_load_mesh_data(Model* model, std::string_view path, bool is_dynamic, ModelFileType file_type, LoadModelProcessStep process_steps) {
 		model->name = std::string(path.data() + std::string(path).find_last_of('/') + 1);
 		std::string full_path = path.data() + std::string("/") + model->name + _get_model_file_type_as_str(file_type);
 
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(full_path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(full_path, process_steps);
 		if (scene == nullptr) {
 			Debug::log("AssetHandler::_load_mesh_data(Model*, std::string_view, bool, ModelFileType) -> failed to load model path \"" + full_path + "\"", DebugType_Error);
 			return;
@@ -121,15 +170,6 @@ namespace ghl {
 		mesh->vertices = std::move(vertices);
 		mesh->indices = std::move(indices);
 		mesh->material = material;
-
-		mesh->vertex_array_buffer.bind();
-		mesh->vertex_array_buffer.is_dynamic() = is_dynamic;
-		mesh->vertex_array_buffer.set_vertex_data(mesh->vertices.size() * (sizeof(vertices) / sizeof(float)), reinterpret_cast<float*>(mesh->vertices.data()));
-		mesh->vertex_array_buffer.set_index_data(mesh->indices.size(), mesh->indices.data());
-		mesh->vertex_array_buffer.set_attribute(3, sizeof(Vertex), offsetof(Vertex, position));
-		mesh->vertex_array_buffer.set_attribute(3, sizeof(Vertex), offsetof(Vertex, normal));
-		mesh->vertex_array_buffer.set_attribute(2, sizeof(Vertex), offsetof(Vertex, uv));
-		mesh->vertex_array_buffer.unbind();
 	}
 
 	void AssetHandler::_process_assimp_node(Model* model, aiNode* node, const aiScene* scene) {
@@ -176,7 +216,7 @@ namespace ghl {
 			}
 		}
 
-		return Mesh{ VertexArrayBuffer(true, vertices.size(), nullptr, indices.size(), nullptr), vertices, indices };
+		return Mesh{ vertices, indices};
 	}
 
 	std::string AssetHandler::_get_model_file_type_as_str(ModelFileType file_type) const {
@@ -201,6 +241,10 @@ namespace ghl {
 		}
 
 		return str;
+	}
+
+	NonRunTimeAssetHandler::NonRunTimeAssetHandler() : ApplicationLayer(GHL_CORE_NON_RUNTIME_ASSET_HANDLER_NAME) {
+
 	}
 
 }

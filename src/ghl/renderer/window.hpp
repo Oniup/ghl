@@ -14,6 +14,9 @@ namespace ghl {
         Window(int width, int height, std::string_view title);
         virtual ~Window() override;
 
+        inline int get_width() const { return m_width;  }
+        inline int get_height() const { return m_height; }
+        inline const std::string& get_title() const { return m_title; }
         inline GLFWwindow* get_internal() { return m_internal; }
         inline const GLFWwindow* get_internal() const { return m_internal; }
         inline void set_clear_color(glm::vec4 clear_color) { m_clear_color = clear_color; }

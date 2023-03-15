@@ -14,7 +14,7 @@ namespace ghl {
 
 	Pipeline* Pipeline::m_instance = nullptr;
 
-	VertexArrayBuffer::VertexArrayBuffer() : VertexArrayBuffer(true, 0, nullptr, 0, nullptr) {
+	VertexArrayBuffer::VertexArrayBuffer() : VertexArrayBuffer(true, 0, 0, nullptr, 0, nullptr) {
 	}
 
 	VertexArrayBuffer::VertexArrayBuffer(VertexArrayBuffer&& other) noexcept {
@@ -25,16 +25,18 @@ namespace ghl {
 		*this = other;
 	}
 
-	VertexArrayBuffer::VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, const float* vertex_data, size_t element_data_size, const uint32_t* element_data) : m_is_dynamic(is_dynamic) {
+	VertexArrayBuffer::VertexArrayBuffer(bool is_dynamic, size_t vertex_data_size, size_t vertex_data_type_size, const void* vertex_data, size_t element_data_size, const uint32_t* element_data) : m_is_dynamic(is_dynamic) {
 		glGenVertexArrays(1, &m_vertex_array);
 		glBindVertexArray(m_vertex_array);
+		glGenBuffers(1, &m_vertex_buffer);
+		glGenBuffers(1, &m_index_buffer);
 
 		int draw_state = m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
-		glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, draw_state);
+		glBufferData(GL_ARRAY_BUFFER, vertex_data_type_size * vertex_data_size, vertex_data, draw_state);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, element_data_size, element_data, draw_state);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * element_data_size, element_data, draw_state);
 
 		m_vertex_buffer_size = vertex_data_size;
 		m_index_buffer_size = element_data_size;
@@ -92,14 +94,14 @@ namespace ghl {
 		m_attribute_count++;
 	}
 
-	void VertexArrayBuffer::set_vertex_data(size_t vertices_size, const float* vertices, uint32_t offset) {
+	void VertexArrayBuffer::set_vertex_data(size_t vertices_size, size_t vertex_type_size, const void* vertices, uint32_t offset) {
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer);
 
 		if (m_vertex_buffer_size == vertices_size) {
-			glBufferSubData(GL_ARRAY_BUFFER, offset, vertices_size, vertices);
+			glBufferSubData(GL_ARRAY_BUFFER, offset, vertex_type_size * vertices_size, vertices);
 		}
 		else {
-			glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, vertex_type_size * vertices_size, vertices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 			m_vertex_buffer_size = vertices_size;
 		}
 	}
@@ -108,10 +110,10 @@ namespace ghl {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer);
 
 		if (m_vertex_buffer_size == indices_size) {
-			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, indices_size, indices);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeof(uint32_t) * indices_size, indices);
 		}
 		else {
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices_size, indices, m_is_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 			m_index_buffer_size = indices_size;
 		}
 	}
@@ -124,25 +126,11 @@ namespace ghl {
 		glBindVertexArray(0);
 	}
 
-	Shader::~Shader() {
-		if (program != 0) {
-			glDeleteProgram(program);
-			program = 0;
-		}
-	}
-
-	Texture::~Texture() {
-		if (image != 0) {
-			glDeleteTextures(1, &image);
-			image = 0;
-			size = glm::ivec2(0, 0);
-		}
-	}
-
-	Pipeline::Pipeline() : ApplicationLayer(GHL_RENDERER_PIPELINE_LAYER_NAME) {
+	Pipeline::Pipeline(Window* window_layer) : ApplicationLayer(GHL_RENDERER_PIPELINE_LAYER_NAME) {
 		GHL_ASSERT(m_instance != nullptr, "Pipeline::Pipeline() -> cannot have mutiple pipeline instances loaded");
 
 		m_instance = this;
+		m_window_layer = window_layer;
 	}
 
 	Pipeline::~Pipeline() {
@@ -284,37 +272,21 @@ namespace ghl {
 		return { name.data(), glm::ivec2(width, height), texture };
 	}
 
-	BatchRenderer::BatchRenderer() : PipelineRenderer(GHL_PIPELINE_RENDERER_BATCH_NAME) {
-		SceneManager::get()->push_system<BatchRenderer::_BatchSystem>(this);
+	void Pipeline::destroy_shader_resource(Shader* shader) {
+		if (shader != nullptr) {
+			if (shader->program != 0) {
+				glDeleteShader(shader->program);
+				shader->program = 0;
+			}
+		}
 	}
 
-	void BatchRenderer::on_render() {
-
-	}
-
-	void BatchRenderer::submit(Mesh* mesh, glm::mat4& model_matrix, Material* material) {
-		
-	}
-
-	BatchRenderer::_BatchSystem::_BatchSystem(BatchRenderer* renderer) : m_renderer(renderer) {
-
-	}
-
-	void BatchRenderer::_BatchSystem::on_render(entt::registry& registry) {
-		auto group = registry.group<TransformComponent>(entt::get<ModelRendererComponent>);
-		for (auto entity : group) {
-			// TODO(Ewan): rework how model data is retrieved 
-			TransformComponent& transform = group.get<TransformComponent>(entity);
-			ModelRendererComponent& model = group.get<ModelRendererComponent>(entity);
-
-			glm::mat4 model_matrix = glm::mat4(1.0f);
-			model_matrix = glm::translate(model_matrix, transform.position);
-			model_matrix = glm::scale(model_matrix, transform.scale);
-			model_matrix = glm::rotate(model_matrix, glm::radians(transform.rotation.w), glm::vec3(transform.rotation));
-
-			// for (Mesh& mesh : model.model->meshes) {
-			// 	m_renderer->submit(&mesh, model_matrix, mesh.material);
-			// }
+	void Pipeline::destroy_texture_resource(Texture* texture) {
+		if (texture != nullptr) {
+			if (texture->image != 0) {
+				glDeleteTextures(1, &texture->image);
+				texture->image = 0;
+			}
 		}
 	}
 

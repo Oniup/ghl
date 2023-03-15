@@ -76,7 +76,7 @@ namespace ghl {
 			}
 
 			for (System* system : m_systems) {
-				system->on_render(m_active_scene->get_registry());
+				system->on_before_render(m_active_scene->get_registry());
 			}
 		}
 		else {

@@ -8,10 +8,11 @@ namespace ghl {
 
 	class System {
 	public:
-		//TODO(Ewan): virtual void on_fixed_update(entt::registry& registry) {}
+		// TODO(Ewan): implement on_fixed_update
+		virtual void on_fixed_update(entt::registry& registry) {}
 		virtual void on_update(entt::registry& registry) {}
 		virtual void on_late_update(entt::registry& registry) {}
-		virtual void on_render(entt::registry& registry) {}
+		virtual void on_before_render(entt::registry& registry) {}
 	};
 
 	class Scene {

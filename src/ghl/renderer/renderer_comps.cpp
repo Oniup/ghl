@@ -3,7 +3,7 @@
 namespace ghl {
 
 	ModelRendererComponent::~ModelRendererComponent() {
-		if (!is_static) {
+		if (!is_static && model != nullptr) {
 			delete model;
 		}
 	}

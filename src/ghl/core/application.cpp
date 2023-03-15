@@ -57,8 +57,8 @@ namespace ghl {
     }
 
     void Application::_init_required_layers() {
-        push_layer(new Window(600, 600, "Test Window"));
-        push_layer(new Pipeline());
+        Window* window_layer = static_cast<Window*>(push_layer(new Window(600, 600, "Test Window")));
+        push_layer(new Pipeline(window_layer));
         push_layer(new SceneManager());
         push_layer(new AssetHandler());
     }
